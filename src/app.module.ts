@@ -3,6 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { User } from './users/user.entity';
+import { UsersController } from './users/users.controller';
+import { UsersModule } from './users/users.module';
 
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('Loading file:', `.${process.env.NODE_ENV}.env`);
@@ -16,10 +19,6 @@ console.log('Loading file:', `.${process.env.NODE_ENV}.env`);
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        console.log('DB_USER:', configService.get('DB_USER'));
-        console.log('DB_PASSWORD:', configService.get('DB_PASSWORD'));
-        console.log('DB_HOST:', configService.get('DB_HOST'));
-        console.log('DB_NAME:', configService.get('DB_NAME'));
         return {
           type: 'postgres',
           host: configService.get<string>('DB_HOST'),
@@ -29,11 +28,13 @@ console.log('Loading file:', `.${process.env.NODE_ENV}.env`);
           database: configService.get<string>('DB_NAME'),
           autoloadEntities: true,
           synchronize: true,
+          entities: [User],
         };
       },
     }),
+    UsersModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, UsersController],
   providers: [AppService, ConfigService],
 })
 export class AppModule {}
