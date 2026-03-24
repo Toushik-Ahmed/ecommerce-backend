@@ -3,9 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { User } from './users/user.entity';
-import { UsersController } from './users/users.controller';
-import { UsersModule } from './users/users.module';
 
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('Loading file:', `.${process.env.NODE_ENV}.env`);
@@ -24,7 +23,7 @@ console.log('Loading file:', `.${process.env.NODE_ENV}.env`);
           host: configService.get<string>('DB_HOST'),
           port: configService.get<number>('DB_PORT'),
           username: configService.get<string>('DB_USER'),
-          password: configService.get<string>('DB_PASSWORD'),
+          password: String(configService.get('DB_PASSWORD')),
           database: configService.get<string>('DB_NAME'),
           autoloadEntities: true,
           synchronize: true,
@@ -32,9 +31,9 @@ console.log('Loading file:', `.${process.env.NODE_ENV}.env`);
         };
       },
     }),
-    UsersModule,
+    AuthModule,
   ],
-  controllers: [AppController, UsersController],
-  providers: [AppService, ConfigService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

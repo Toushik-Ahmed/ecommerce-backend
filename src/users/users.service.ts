@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserAlreadyExitsException } from '../customException/user-already-exists.exception';
@@ -14,7 +18,7 @@ export class UsersService {
     private bcryptProvider: BcryptProvider,
   ) {}
 
-  public async createUser(user: CreateUserDto) {
+  public async createUser(user: CreateUserDto): Promise<User> {
     try {
       const existingUser = await this.userRepository.findOne({
         where: { email: user.email },
@@ -28,6 +32,9 @@ export class UsersService {
       });
       return await this.userRepository.save(newUser);
     } catch (error: unknown) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'An error occurred',
       );
